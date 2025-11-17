@@ -1,65 +1,69 @@
-ext {
-    androidxAppCompatVersion = project.hasProperty('androidxAppCompatVersion') ? rootProject.ext.androidxAppCompatVersion : '1.7.0'
-    cordovaAndroidVersion = project.hasProperty('cordovaAndroidVersion') ? rootProject.ext.cordovaAndroidVersion : '10.1.1'
-}
-
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.7.2'
-    }
-}
-
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 
 android {
-    namespace "capacitor.cordova.android.plugins"
-    compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35
+    namespace "com.hallor.app"
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 23
-        targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 35
+        applicationId "com.hallor.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
     }
-    lintOptions {
-        abortOnError false
-    }
+    
+    // Override Java version to match GitHub Actions workflow (Java 17)
     compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$rootProject.ext.coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+// Ensure Java 17 is used (override any settings from capacitor.build.gradle)
+afterEvaluate {
+    android.compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-    flatDir{
-        dirs 'src/main/libs', 'libs'
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
     }
-}
-
-dependencies {
-    implementation fileTree(dir: 'src/main/libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "org.apache.cordova:framework:$cordovaAndroidVersion"
-    // SUB-PROJECT DEPENDENCIES START
-
-    // SUB-PROJECT DEPENDENCIES END
-}
-
-// PLUGIN GRADLE EXTENSIONS START
-if (file("cordova.variables.gradle").exists()) {
-    apply from: "cordova.variables.gradle"
-}
-// PLUGIN GRADLE EXTENSIONS END
-
-// Safeguard cdvPluginPostBuildExtras usage
-if (!hasProperty('cdvPluginPostBuildExtras')) {
-    ext.cdvPluginPostBuildExtras = []
-}
-cdvPluginPostBuildExtras.each { func ->
-    func()
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
