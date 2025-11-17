@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
       
     - name: Build APK
       working-directory: android
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease --stacktrace --info
       
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
@@ -49,3 +49,4 @@ jobs:
         name: app-release.apk
         path: android/app/build/outputs/apk/release/app-release.apk
         retention-days: 30
+
