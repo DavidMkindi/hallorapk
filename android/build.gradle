@@ -51,9 +51,15 @@ dependencies {
 }
 
 // PLUGIN GRADLE EXTENSIONS START
-apply from: "cordova.variables.gradle"
+if (file("cordova.variables.gradle").exists()) {
+    apply from: "cordova.variables.gradle"
+}
 // PLUGIN GRADLE EXTENSIONS END
 
-for (def func : cdvPluginPostBuildExtras) {
+// Safeguard cdvPluginPostBuildExtras usage
+if (!hasProperty('cdvPluginPostBuildExtras')) {
+    ext.cdvPluginPostBuildExtras = []
+}
+cdvPluginPostBuildExtras.each { func ->
     func()
 }
