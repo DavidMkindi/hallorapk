@@ -1,0 +1,51 @@
+{
+	"appId": "com.hallor.app",
+	"appName": "Hallor",
+	"webDir": "dist",
+	"server": {
+		"url": "https://hallor.sbs",
+		"cleartext": false
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#ffffff"
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		},
+		"Camera": {
+			"cameraDirection": "BACK"
+		}
+	},
+	"android": {
+		"allowMixedContent": true,
+		"captureInput": true
+	},
+	"ios": {
+		"allowsLinkPreview": true,
+		"scrollEnabled": true
+	},
+	"packageClassList": [
+		"MediaPlugin",
+		"ActionSheetPlugin",
+		"AppPlugin",
+		"CAPCameraPlugin",
+		"FilesystemPlugin",
+		"GeolocationPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"LocalNotificationsPlugin",
+		"CAPNetworkPlugin",
+		"PreferencesPlugin",
+		"PushNotificationsPlugin",
+		"SharePlugin",
+		"SplashScreenPlugin",
+		"StatusBarPlugin",
+		"ToastPlugin"
+	]
+}
